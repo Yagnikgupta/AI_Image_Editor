@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Download, Undo2, Redo2, RotateCcw, Sparkles, Bot, Sun, Moon,
+  Download, Undo2, Redo2, RotateCcw, Sparkles, Bot, Sun, Moon, X,
 } from 'lucide-react';
 
 export default function TopBar({
@@ -13,20 +13,31 @@ export default function TopBar({
   canRedo,
   onToggleAI,
   showAIAgent,
+  onCloseImage,
 }) {
   const [darkMode, setDarkMode] = React.useState(true);
   const [showExportMenu, setShowExportMenu] = React.useState(false);
 
   return (
     <div className="h-14 bg-dark-700/90 backdrop-blur-lg border-b border-dark-500/30 flex items-center justify-between px-4 z-50">
-      {/* Left: Logo */}
-      <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-white" />
+      {/* Left: Close & Logo */}
+      <div className="flex items-center gap-2 md:gap-4">
+        <button 
+          onClick={onCloseImage} 
+          className="btn-ghost text-red-400 hover:text-red-300 hover:bg-red-400/10 p-2" 
+          title="Close Image & Upload New"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="w-px h-6 bg-dark-500/50 hidden md:block" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-sm font-bold bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent hidden sm:block">
+            PixelMind AI
+          </span>
         </div>
-        <span className="text-sm font-bold bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent">
-          PixelMind AI
-        </span>
       </div>
 
       {/* Center: Actions */}

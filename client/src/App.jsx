@@ -91,11 +91,23 @@ export default function App() {
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    if (originalImageSrc) localStorage.setItem('pixelmind_original_image', originalImageSrc);
-    else localStorage.removeItem('pixelmind_original_image');
+    try {
+      if (originalImageSrc) {
+        localStorage.setItem('pixelmind_original_image', originalImageSrc);
+      } else {
+        localStorage.removeItem('pixelmind_original_image');
+      }
 
-    if (imageSrc) localStorage.setItem('pixelmind_image', imageSrc);
-    else localStorage.removeItem('pixelmind_image');
+      if (imageSrc) {
+        localStorage.setItem('pixelmind_image', imageSrc);
+      } else {
+        localStorage.removeItem('pixelmind_image');
+      }
+    } catch (e) {
+      console.warn('LocalStorage quota exceeded or error, clearing images from cache:', e);
+      localStorage.removeItem('pixelmind_original_image');
+      localStorage.removeItem('pixelmind_image');
+    }
     
     localStorage.setItem('pixelmind_tool', activeTool);
     if (activeFilter) localStorage.setItem('pixelmind_filter', activeFilter);
@@ -108,10 +120,17 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target.result;
-      setOriginalImageSrc(result);
-      setImageSrc(result);
-      setActiveFilter(null);
-      setAdjustments(INITIAL_ADJUSTMENTS);
+      
+      // Let's ensure it's a valid data URL and state is completely reset
+      setImageSrc(null); // Force unmount/remount of canvas if needed
+      setTimeout(() => {
+        setOriginalImageSrc(result);
+        setImageSrc(result);
+        setActiveFilter(null);
+        setAdjustments(INITIAL_ADJUSTMENTS);
+        setCropRatio(null);
+        setIsCropping(false);
+      }, 0);
       
       // Reset history on new upload
       setHistory([{ imageSrc: result, adjustments: INITIAL_ADJUSTMENTS, activeFilter: null }]);
@@ -183,6 +202,24 @@ export default function App() {
     }
   }, [originalImageSrc]);
 
+  const handleCloseImage = useCallback(() => {
+    setImageSrc(null);
+    setOriginalImageSrc(null);
+    setAdjustments(INITIAL_ADJUSTMENTS);
+    setActiveFilter(null);
+    setCropRatio(null);
+    setIsCropping(false);
+    setHistory([]);
+    setHistoryIndex(-1);
+    
+    // Explicitly clear local storage cache
+    localStorage.removeItem('pixelmind_original_image');
+    localStorage.removeItem('pixelmind_image');
+    localStorage.removeItem('pixelmind_adjustments');
+    localStorage.removeItem('pixelmind_filter');
+    localStorage.removeItem('pixelmind_tool');
+  }, []);
+
   const handleExport = useCallback((format = 'png') => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -231,6 +268,7 @@ export default function App() {
         onExport={handleExport}
         onEnhance={handleEnhance}
         onReset={handleReset}
+        onCloseImage={handleCloseImage}
         onUndo={handleUndo}
         onRedo={handleRedo}
         canUndo={historyIndex > 0}
@@ -269,7 +307,7 @@ export default function App() {
           onFilterSelect={handleFilterSelect}
           cropRatio={cropRatio}
           onCropRatioChange={(r) => { setCropRatio(r); setIsCropping(true); setActiveTool('crop'); }}
-          onCropApply={() => setIsCropping(false)}
+          onCropApply={() => { setIsCropping(false); setActiveTool('adjust'); }}
           imageSrc={imageSrc}
           onImageChange={setImageSrc}
           onStateChange={handleStateChange}

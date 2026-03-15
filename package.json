@@ -1,0 +1,11 @@
+{
+  "name": "ai-image-editor-root",
+  "version": "1.0.0",
+  "scripts": {
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev": "npx concurrently \"npm run dev --prefix client\" \"npm start --prefix server\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

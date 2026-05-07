@@ -30,6 +30,7 @@ export default function App() {
   
   const [cropRatio, setCropRatio] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
+  const [cancelCropTrigger, setCancelCropTrigger] = useState(0);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showAIAgent, setShowAIAgent] = useState(false);
@@ -171,6 +172,7 @@ export default function App() {
     setActiveFilter(null);
     setCropRatio(null);
     setIsCropping(false);
+    setCancelCropTrigger(prev => prev + 1);
     
     // Reset history tracking
     if (originalImageSrc) {
@@ -209,6 +211,7 @@ export default function App() {
     setActiveFilter(null);
     setCropRatio(null);
     setIsCropping(false);
+    setCancelCropTrigger(prev => prev + 1);
     setHistory([]);
     setHistoryIndex(-1);
     
@@ -279,7 +282,13 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden">
         <Toolbar
           activeTool={activeTool}
-          onToolSelect={setActiveTool}
+          onToolSelect={(tool) => {
+            setActiveTool(tool);
+            if (tool !== 'crop' && isCropping) {
+              setCancelCropTrigger(prev => prev + 1);
+              setIsCropping(false);
+            }
+          }}
           onCropStart={() => { setActiveTool('crop'); setIsCropping(true); }}
         />
         <div className="flex-1 flex flex-col relative overflow-hidden">
@@ -290,6 +299,7 @@ export default function App() {
             activeFilter={activeFilter}
             cropRatio={cropRatio}
             isCropping={isCropping}
+            cancelCropTrigger={cancelCropTrigger}
             onStateChange={handleStateChange}
           />
           {showAIAgent && (

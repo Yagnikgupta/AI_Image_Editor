@@ -11,7 +11,6 @@ const TOOLS = [
   { id: 'crop', icon: Crop, label: 'Crop' },
   { id: 'transform', icon: Move, label: 'Transform' },
   { id: 'background', icon: Eraser, label: 'BG Remove' },
-  { id: 'retouch', icon: Brush, label: 'Retouch' },
   { id: 'text', icon: Type, label: 'Text' },
   { id: 'shapes', icon: Shapes, label: 'Shapes' },
   { id: 'stickers', icon: SmilePlus, label: 'Stickers' },

@@ -12,7 +12,7 @@ const FILTER_PRESETS = {
 };
 
 const Canvas = forwardRef(function CanvasComponent(
-  { imageSrc, adjustments, activeFilter, cropRatio, isCropping, onStateChange },
+  { imageSrc, adjustments, activeFilter, cropRatio, isCropping, cancelCropTrigger, onStateChange },
   ref
 ) {
   const containerRef = useRef(null);
@@ -229,6 +229,15 @@ const Canvas = forwardRef(function CanvasComponent(
 
   // Handle Crop Overlay and Execution
   const prevIsCropping = useRef(isCropping);
+
+  // Cancel trigger explicitly clears the rect
+  useEffect(() => {
+    if (cancelCropTrigger > 0 && cropRectRef.current && fabricRef.current) {
+      fabricRef.current.remove(cropRectRef.current);
+      cropRectRef.current = null;
+    }
+  }, [cancelCropTrigger]);
+
   useEffect(() => {
     if (!fabricModule || !fabricRef.current || !imageRef.current) return;
     const fabric = fabricModule;
@@ -268,6 +277,9 @@ const Canvas = forwardRef(function CanvasComponent(
         if (onStateChange) {
            onStateChange({ imageSrc: croppedDataUrl });
         }
+        
+        c.remove(cropRectRef.current);
+        cropRectRef.current = null;
       } catch (err) {
         console.error('Crop execution error:', err);
       }

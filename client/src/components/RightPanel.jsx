@@ -400,6 +400,21 @@ function ShapesPanel({ canvasRef }) {
     }
   };
 
+  const removeSelected = () => {
+    const c = canvasRef?.current;
+    if (!c) return;
+    const activeObjects = c.getActiveObjects();
+    if (activeObjects.length) {
+      c.discardActiveObject();
+      activeObjects.forEach((object) => {
+        if (object.name !== 'imageBackground' && object.type !== 'image' && object.type !== 'FabricImage') {
+          c.remove(object);
+        }
+      });
+      c.renderAll();
+    }
+  };
+
   return (
     <div className="space-y-4 animate-fade-in">
       <h3 className="text-xs font-semibold text-dark-200 uppercase tracking-wider">Shapes</h3>
@@ -415,6 +430,9 @@ function ShapesPanel({ canvasRef }) {
           </button>
         ))}
       </div>
+      <button onClick={removeSelected} className="w-full mt-2 btn-ghost border border-red-500/30 text-xs text-red-400 hover:bg-red-500/10">
+        <X className="w-4 h-4" /> Delete Selected
+      </button>
     </div>
   );
 }
@@ -453,7 +471,7 @@ function StickersPanel({ canvasRef }) {
 }
 
 /* ============== Templates Panel ============== */
-function TemplatesPanel({ canvasRef }) {
+function TemplatesPanel({ onCropRatioChange }) {
   const templates = [
     { label: 'Instagram Post', w: 1080, h: 1080, icon: Hash },
     { label: 'Instagram Story', w: 1080, h: 1920, icon: Hash },
@@ -468,42 +486,13 @@ function TemplatesPanel({ canvasRef }) {
       <h3 className="text-xs font-semibold text-dark-200 uppercase tracking-wider">Templates</h3>
       <div className="space-y-2">
         {templates.map(({ label, w, h, icon: Icon }) => (
-          <button key={label} className="w-full flex items-center gap-3 p-3 bg-dark-600 hover:bg-dark-500 rounded-xl transition-all text-left group">
+          <button key={label} onClick={() => onCropRatioChange(w / h)} className="w-full flex items-center gap-3 p-3 bg-dark-600 hover:bg-dark-500 rounded-xl transition-all text-left group">
             <div className="w-10 h-10 bg-dark-500 group-hover:bg-primary-700/20 rounded-lg flex items-center justify-center transition-colors">
               <Icon className="w-4 h-4 text-dark-200 group-hover:text-primary-400" />
             </div>
             <div>
               <p className="text-sm font-medium text-dark-50">{label}</p>
               <p className="text-xs text-dark-300">{w} × {h}px</p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ============== Retouch Panel ============== */
-function RetouchPanel() {
-  const tools = [
-    { label: 'Blur Brush', icon: Brush, desc: 'Blur specific areas' },
-    { label: 'Spot Heal', icon: Eye, desc: 'Remove blemishes' },
-    { label: 'Smooth Skin', icon: Sparkles, desc: 'Smooth skin tones' },
-    { label: 'Red Eye Fix', icon: EyeOff, desc: 'Remove red eyes' },
-  ];
-
-  return (
-    <div className="space-y-4 animate-fade-in">
-      <h3 className="text-xs font-semibold text-dark-200 uppercase tracking-wider">Retouch Tools</h3>
-      <div className="space-y-2">
-        {tools.map(({ label, icon: Icon, desc }) => (
-          <button key={label} className="w-full flex items-center gap-3 p-3 bg-dark-600 hover:bg-dark-500 rounded-xl transition-all text-left group">
-            <div className="w-9 h-9 bg-dark-500 group-hover:bg-primary-700/20 rounded-lg flex items-center justify-center transition-colors">
-              <Icon className="w-4 h-4 text-dark-200 group-hover:text-primary-400" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-dark-50">{label}</p>
-              <p className="text-xs text-dark-300">{desc}</p>
             </div>
           </button>
         ))}
@@ -533,11 +522,10 @@ export default function RightPanel({
     crop: <CropPanel cropRatio={cropRatio} onCropRatioChange={onCropRatioChange} onCropApply={onCropApply} />,
     transform: <TransformPanel canvasRef={canvasRef} />,
     background: <BackgroundPanel imageSrc={imageSrc} onImageChange={onImageChange} onStateChange={onStateChange} canvasRef={canvasRef} />,
-    retouch: <RetouchPanel />,
     text: <TextPanel canvasRef={canvasRef} />,
     shapes: <ShapesPanel canvasRef={canvasRef} />,
     stickers: <StickersPanel canvasRef={canvasRef} />,
-    templates: <TemplatesPanel canvasRef={canvasRef} />,
+    templates: <TemplatesPanel onCropRatioChange={onCropRatioChange} />,
   };
 
   return (
